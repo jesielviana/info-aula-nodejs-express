@@ -1,17 +1,17 @@
+import { PrismaClient } from '@prisma/client';
 import { Router } from 'express';
-import ServicoUsuario from '../servicos/ServicoUsuario.js';
 const rotasDeUsuarios = Router();
 
-const servicoUsuario = new ServicoUsuario();
+const prisma = new PrismaClient();
 
 rotasDeUsuarios.get('/usuarios', async (req, res) => {
-  const usuarios = await servicoUsuario.consultaTodos();
+  const usuarios = await prisma.usuario.findMany({});
   res.json(usuarios);
 });
 
-rotasDeUsuarios.get('/usuarios/:id', (req, res) => {
+rotasDeUsuarios.get('/usuarios/:id', async (req, res) => {
   const id = req.params.id;
-  const usuario = servicoUsuario.consultaPorId(id);
+  const usuario = prisma.usuario.findUnique({ where: { id: id } });
   if (usuario) {
     res.json(usuario);
   } else {
@@ -21,8 +21,9 @@ rotasDeUsuarios.get('/usuarios/:id', (req, res) => {
 
 rotasDeUsuarios.post('/usuarios', async (req, res) => {
   const usuario = req.body;
-  console.log('body', usuario);
-  await servicoUsuario.add(usuario);
+  await prisma.usuario.create({
+    data: usuario,
+  });
   res.send('deu certo!');
 });
 
